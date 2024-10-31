@@ -1,0 +1,13 @@
+{
+  "HomePage": {
+    "title": "Hello world!",
+    "about": "Go to the about page"
+  },
+  "LoginPage": {
+    "rememberMe": "Remember Me",
+    "title": "Welcome to login",
+    "haveAccount": "Don't have an account?",
+    "signUp": "Sign Up",
+    "login": "Login"
+  }
+}

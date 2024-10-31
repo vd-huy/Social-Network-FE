@@ -1,0 +1,13 @@
+{
+  "HomePage": {
+    "title": "Xin chào thế giới!",
+    "about": "tới trang About"
+  },
+  "LoginPage": {
+    "rememberMe": "Ghi nhớ đăng nhập",
+    "title": "Chào mừng đến với trang đăng nhập",
+    "haveAccount": "Bạn chưa có tài khoản?",
+    "signUp": "Đăng ký",
+    "login": "Đăng nhập"
+  }
+}

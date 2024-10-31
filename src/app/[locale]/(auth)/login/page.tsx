@@ -34,15 +34,18 @@ export default function LoginPage() {
 
       const { data } = response;
 
-      setAuthState({
+      const newAuthState = {
         isLoggedIn: true,
         accessToken: data.data.access_token,
-      });
+      };
 
+      setAuthState(newAuthState); // Update Recoil state
+
+      // Save to localStorage or sessionStorage based on rememberMe
       if (rememberMe) {
-        localStorage.setItem("authState", JSON.stringify(authState));
+        localStorage.setItem("authState", JSON.stringify(newAuthState));
       } else {
-        sessionStorage.setItem("authState", JSON.stringify(authState));
+        sessionStorage.setItem("authState", JSON.stringify(newAuthState));
       }
     } catch (err) {
       setError("Email or password is not correct");
@@ -52,10 +55,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (authState?.isLoggedIn) router.replace("/");
-  }, [authState?.isLoggedIn, router]);
+  }, [authState.isLoggedIn, router]);
 
   return (
-    <div className="md:h-screen flex justify-center items-center auth-background ">
+    <div className="md:h-screen flex justify-center items-center auth-background">
       <div className="container mx-auto flex items-center md:shadow-md xl:p-32 md:p-5 flex-col md:flex-row bg-white">
         <div className="md:w-[40%] xl:w-1/2 w-full text-white bg-red-400 flex items-center justify-center flex-col gap-3 min-h-[300px]">
           <h1 className="text-4xl">{t("title")}</h1>
@@ -103,9 +106,8 @@ export default function LoginPage() {
             <div className="flex items-center space-x-2 mb-4">
               <Checkbox
                 id="rememberCheckbox"
-                onChange={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  setRememberMe(target.checked);
+                onCheckedChange={(checked: boolean) => {
+                  setRememberMe(checked);
                 }}
               />
               <label

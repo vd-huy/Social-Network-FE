@@ -17,6 +17,7 @@
     "signUp": "Đăng ký",
     "signIn": "Đăng nhập",
     "name": "Tên",
+    "gender": "Giới tính",
     "password": "Mật khẩu",
     "successfully": "Đăng kí thành công bạn sẽ được chuyển đến trang chủ trong {second} giây nữa"
   }

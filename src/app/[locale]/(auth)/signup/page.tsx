@@ -10,6 +10,13 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useSnackbar } from "notistack";
 import { ReloadIcon } from "@radix-ui/react-icons";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function SignInPage() {
   const t = useTranslations("SignUpPage");
@@ -18,6 +25,7 @@ export default function SignInPage() {
 
   const [authState, setAuthState] = useRecoilState(authAtom);
   const [name, setName] = useState<string>("");
+  const [gender, setGender] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -31,6 +39,7 @@ export default function SignInPage() {
         `${process.env.API_URL}/auth/signup`,
         {
           name,
+          gender: gender === "true",
           email,
           password,
         }
@@ -76,9 +85,14 @@ export default function SignInPage() {
             setAuthState(newAuthState);
           }
         }, 1000);
+      } else {
+        enqueueSnackbar(data.message, {
+          variant: "error",
+          autoHideDuration: 3000,
+        });
       }
     } catch (err) {
-      setError("Email or password is not correct");
+      setError("Fail to sign up account");
       console.error(err);
     }
   };
@@ -116,6 +130,23 @@ export default function SignInPage() {
                 required
                 className="shadow appearance-none border rounded w-full p-3 text-gray-700 outline-red-400"
               />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="gender" className="block text-sm font-bold mb-2">
+                {t("gender")}
+              </label>
+              <Select
+                value={gender}
+                onValueChange={(gender: string) => setGender(gender)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Nam</SelectItem>
+                  <SelectItem value="false">Nữ</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="mb-4">
               <label htmlFor="email" className="block text-sm font-bold mb-2">

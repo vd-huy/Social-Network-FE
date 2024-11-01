@@ -2,35 +2,35 @@
 
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { authAtom } from "@/shared/store/atoms/authAtom";
 import { IAuthResponse } from "@/shared/types/auth.type";
 import { useRouter } from "next/navigation";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { enqueueSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
 import { ReloadIcon } from "@radix-ui/react-icons";
 
-export default function LoginPage() {
-  const t = useTranslations("LoginPage");
+export default function SignInPage() {
+  const t = useTranslations("SignUpPage");
   const router = useRouter();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const [authState, setAuthState] = useRecoilState(authAtom);
+  const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     try {
-      setLoading(true);
       const response = await axios.post<IAuthResponse>(
-        `${process.env.API_URL}/auth/signin`,
+        `${process.env.API_URL}/auth/signup`,
         {
+          name,
           email,
           password,
         }
@@ -38,31 +38,54 @@ export default function LoginPage() {
 
       const { data } = response;
 
-      const newAuthState = {
-        isLoggedIn: true,
-        accessToken: data.data.access_token,
-        remember: rememberMe,
-      };
+      if (data.statusCode === HttpStatusCode.Created) {
+        const newAuthState = {
+          isLoggedIn: true,
+          accessToken: data.data.access_token,
+          remember: false,
+        };
 
-      setAuthState(newAuthState); // Update Recoil state
+        // Show initial success notification
+        let secondsLeft = 3;
+        const snackbarKey = enqueueSnackbar(
+          t("successfully", { second: secondsLeft }),
+          {
+            variant: "success",
+            autoHideDuration: 3000,
+          }
+        );
 
-      enqueueSnackbar("Login successful", { variant: "success" });
-      setLoading(false);
+        // Update countdown every second
+        const countdown = setInterval(() => {
+          setLoading(true);
+          secondsLeft -= 1;
+
+          if (secondsLeft > 0) {
+            // Close and re-enqueue with updated time
+            closeSnackbar(snackbarKey);
+            enqueueSnackbar(t("successfully", { second: secondsLeft }), {
+              variant: "success",
+              autoHideDuration: 1000 * secondsLeft,
+            });
+          } else {
+            clearInterval(countdown); // Stop countdown
+
+            setLoading(false);
+            // Set new auth state and save to session storage
+            sessionStorage.setItem("authState", JSON.stringify(newAuthState));
+            setAuthState(newAuthState);
+          }
+        }, 1000);
+      }
     } catch (err) {
       setError("Email or password is not correct");
       console.error(err);
     }
   };
 
-  const handleSignUp = () => {
-    router.replace("/signup");
-  };
-
   useEffect(() => {
-    if (authState.isLoggedIn) {
-      router.replace("/");
-    }
-  }, [authState, router]);
+    if (authState?.isLoggedIn) router.replace("/");
+  }, [authState.isLoggedIn, router]);
 
   return (
     <div className="md:h-screen flex justify-center items-center auth-background">
@@ -73,15 +96,27 @@ export default function LoginPage() {
           <Button
             variant="outline"
             className="border-white bg-transparent rounded-xl"
-            onClick={handleSignUp}
           >
-            {t("signUp")}
+            {t("signIn")}
           </Button>
         </div>
         <div className="flex items-center justify-center flex-1 w-full p-3">
-          <form onSubmit={handleLogin} className="w-full max-w-sm">
-            <h1 className="text-2xl font-bold mb-4">{t("login")}</h1>
+          <form onSubmit={handleSignUp} className="w-full max-w-sm">
+            <h1 className="text-2xl font-bold mb-4">{t("signUp")}</h1>
             {error && <p className="text-red-500 mb-4">{error}</p>}
+            <div className="mb-4">
+              <label htmlFor="name" className="block text-sm font-bold mb-2">
+                {t("name")}
+              </label>
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="shadow appearance-none border rounded w-full p-3 text-gray-700 outline-red-400"
+              />
+            </div>
             <div className="mb-4">
               <label htmlFor="email" className="block text-sm font-bold mb-2">
                 Email
@@ -100,7 +135,7 @@ export default function LoginPage() {
                 htmlFor="password"
                 className="block text-sm font-bold mb-2"
               >
-                Password
+                {t("password")}
               </label>
               <input
                 type="password"
@@ -111,20 +146,6 @@ export default function LoginPage() {
                 className="shadow appearance-none border rounded w-full p-3 text-gray-700 outline-red-400"
               />
             </div>
-            <div className="flex items-center space-x-2 mb-4">
-              <Checkbox
-                id="rememberCheckbox"
-                onCheckedChange={(checked: boolean) => {
-                  setRememberMe(checked);
-                }}
-              />
-              <label
-                htmlFor="rememberCheckbox"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {t("rememberMe")}
-              </label>
-            </div>
             {loading ? (
               <Button
                 disabled
@@ -132,14 +153,14 @@ export default function LoginPage() {
                 className="bg-red-400 text-white font-bold py-2 px-4 rounded w-full"
               >
                 <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                {t("login")}
+                {t("signUp")}
               </Button>
             ) : (
               <Button
                 type="submit"
                 className="bg-red-400 text-white font-bold py-2 px-4 rounded w-full"
               >
-                {t("login")}
+                {t("signUp")}
               </Button>
             )}
           </form>

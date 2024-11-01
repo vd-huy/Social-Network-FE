@@ -6,18 +6,20 @@ import { authAtom } from "@/shared/store/atoms/authAtom";
 import { useRouter } from "next/navigation";
 import { isTokenExpired } from "@/shared/utils/tokenExpired";
 
-export default function HomePage() {
+export default function RootPage() {
   const auth = useRecoilValue(authAtom);
   const router = useRouter();
+
+  console.log(auth);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (auth?.isLoggedIn) {
         if (isTokenExpired(auth?.accessToken)) {
-          localStorage.removeItem("authToken");
+          localStorage.removeItem("authState");
           router.replace("/login");
         } else {
-          router.replace("/");
+          router.replace("/dashboard");
         }
       } else {
         router.replace("/login");

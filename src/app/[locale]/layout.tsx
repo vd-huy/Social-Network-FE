@@ -41,6 +41,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} className="mdl-js antialiased">
       <body
+        suppressHydrationWarning={true}
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextIntlClientProvider messages={messages}>

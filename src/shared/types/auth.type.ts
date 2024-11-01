@@ -1,6 +1,7 @@
 export type AuthAtomType = {
   isLoggedIn: boolean;
   accessToken: string | undefined;
+  remember: boolean;
 };
 
 export interface ILoginRequest {
@@ -8,7 +9,7 @@ export interface ILoginRequest {
   password: string;
 }
 
-export interface ILoginResponse {
+export interface IAuthResponse {
   statusCode: number;
   data: { access_token: string };
   message: string;

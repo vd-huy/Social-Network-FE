@@ -46,9 +46,13 @@ export default function LoginPage() {
 
       setAuthState(newAuthState); // Update Recoil state
 
-      enqueueSnackbar("Login successful", { variant: "success" });
+      enqueueSnackbar("Login successful", {
+        variant: "success",
+        autoHideDuration: 1000,
+      });
       setLoading(false);
     } catch (err) {
+      setLoading(false);
       setError("Email or password is not correct");
       console.error(err);
     }

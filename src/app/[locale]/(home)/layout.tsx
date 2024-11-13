@@ -5,6 +5,7 @@ import { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useRecoilValue } from "recoil";
 import { authAtom } from "@/shared/store/atoms/authAtom";
+import Navbar from "@/components/Navbar";
 
 interface HomeLayoutProps {
   children: ReactNode;
@@ -20,5 +21,10 @@ export default function HomeLayout({ children }: HomeLayoutProps) {
     }
   }, [authState.isLoggedIn, router]);
 
-  return <>{children}</>;
+  return (
+    <div className="container mx-auto">
+      <Navbar />
+      {children}
+    </div>
+  );
 }

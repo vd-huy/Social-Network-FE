@@ -1,4 +1,9 @@
 {
+  "Navbar": {
+    "account": "My Account",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
   "HomePage": {
     "title": "Hello world!",
     "about": "Go to the about page"

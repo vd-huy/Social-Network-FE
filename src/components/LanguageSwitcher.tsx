@@ -9,25 +9,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { useTranslations } from "next-intl";
 
 export default function LanguageSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
+  const { i18n } = useTranslations();
   const [currentLocale, setCurrentLocale] = useState<string>("en");
 
+  const languages = ["en", "vi"];
+
   useEffect(() => {
-    // Get language from localStorage on mount
+    // Retrieve language from localStorage on component mount
     const savedLocale = localStorage.getItem("language") || "en";
-    setCurrentLocale(savedLocale);
-    document.cookie = `language=${savedLocale}; path=/`; // Set cookie for the language
+    if (savedLocale !== currentLocale) {
+      setCurrentLocale(savedLocale);
+    }
   }, []);
 
   const handleLocaleChange = (locale: string) => {
-    // Update localStorage and cookie when the language changes
+    // Store the selected locale and update cookie
     localStorage.setItem("language", locale);
-    document.cookie = `language=${locale}; path=/`; // Update the cookie
     setCurrentLocale(locale);
-    router.push(`/${locale}${pathname === "/" ? "" : pathname.slice(3)}`);
+
+    const newPathname = pathname.startsWith(`/${currentLocale}`)
+      ? pathname.replace(`/${currentLocale}`, `/${locale}`)
+      : `/${locale}${pathname}`;
+
+    setCurrentLocale(locale);
+    i18n.changeLanguage(locale); // Update i18n instance
+    router.push(newPathname);
   };
 
   return (
@@ -36,8 +47,13 @@ export default function LanguageSwitcher() {
         <SelectValue placeholder="Select language" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="en">En</SelectItem>
-        <SelectItem value="vi">Vi</SelectItem>
+        {languages.map((language) => {
+          return (
+            <SelectItem key={language} value={language} className="capitalize">
+              {language}
+            </SelectItem>
+          );
+        })}
       </SelectContent>
     </Select>
   );

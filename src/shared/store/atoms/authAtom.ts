@@ -1,5 +1,6 @@
 import { ATOM_KEYS } from "@/shared/constants/atomkeys.constant";
 import { AuthAtomType } from "@/shared/types/auth.type";
+import { setAuthToken } from "@/shared/utils/axiosInstance";
 import { atom } from "recoil";
 
 export const authAtom = atom<AuthAtomType>({
@@ -21,6 +22,8 @@ export const authAtom = atom<AuthAtomType>({
         // Save to the appropriate storage when authAtom changes
         onSet((newAuth) => {
           const authString = JSON.stringify(newAuth);
+
+          setAuthToken(newAuth.accessToken);
 
           // Check if the user is logged in
           if (newAuth.remember) {

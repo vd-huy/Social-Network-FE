@@ -1,4 +1,9 @@
 {
+  "Navbar": {
+    "account": "Tài Khoản Của Tôi",
+    "profile": "Hồ Sơ",
+    "logout": "Đăng Xuất"
+  },
   "HomePage": {
     "title": "Xin chào thế giới!",
     "about": "tới trang About"

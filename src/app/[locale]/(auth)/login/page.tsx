@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { authAtom } from "@/shared/store/atoms/authAtom";
+import { profileAtom } from "@/shared/store/atoms/profileAtom";
 import { IAuthResponse } from "@/shared/types/auth.type";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,17 +12,40 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { enqueueSnackbar } from "notistack";
 import { ReloadIcon } from "@radix-ui/react-icons";
+import { IProfileResponse } from "@/shared/types/profile.type";
+import api from "@/shared/utils/axiosInstance";
 
 export default function LoginPage() {
   const t = useTranslations("LoginPage");
   const router = useRouter();
 
   const [authState, setAuthState] = useRecoilState(authAtom);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [profileState, setProfileState] = useRecoilState(profileAtom);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+
+  const fetchProfile = () => {
+    api
+      .get<IProfileResponse>("/auth/profile")
+      .then((response) => {
+        setProfileState(response.data.data);
+
+        enqueueSnackbar(`${response.data.message}`, {
+          variant: "success",
+          autoHideDuration: 1000,
+        });
+      })
+      .catch((error) => {
+        enqueueSnackbar(`${error}`, {
+          variant: "error",
+          autoHideDuration: 1000,
+        });
+      });
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,19 +62,21 @@ export default function LoginPage() {
 
       const { data } = response;
 
-      const newAuthState = {
-        isLoggedIn: true,
-        accessToken: data.data.access_token,
-        remember: rememberMe,
-      };
+      if (data.statusCode === HttpStatusCode.Ok) {
+        const newAuthState = {
+          isLoggedIn: true,
+          accessToken: data.data.access_token,
+          remember: rememberMe,
+        };
 
-      setAuthState(newAuthState); // Update Recoil state
+        setAuthState(newAuthState); // Update Recoil state
 
-      enqueueSnackbar("Login successful", {
-        variant: "success",
-        autoHideDuration: 1000,
-      });
-      setLoading(false);
+        enqueueSnackbar(`${data.message}`, {
+          variant: "success",
+          autoHideDuration: 1000,
+        });
+        setLoading(false);
+      }
     } catch (err) {
       setLoading(false);
       setError("Email or password is not correct");
@@ -64,6 +90,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (authState.isLoggedIn) {
+      fetchProfile();
       router.replace("/");
     }
   }, [authState, router]);

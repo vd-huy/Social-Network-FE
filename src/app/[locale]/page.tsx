@@ -16,9 +16,8 @@ export default function RootPage({ children }: { children: ReactNode }) {
       if (isTokenExpired(auth?.accessToken)) {
         localStorage.removeItem("authState");
         router.replace("/login");
-      } else {
-        router.replace("/home");
       }
+      router.replace("/home");
     } else {
       router.replace("/login");
     }

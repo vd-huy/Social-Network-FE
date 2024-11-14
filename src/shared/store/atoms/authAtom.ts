@@ -28,6 +28,7 @@ export const authAtom = atom<AuthAtomType>({
           // Check if the user is logged in
           if (newAuth.remember) {
             localStorage.setItem("authState", authString);
+            sessionStorage.removeItem("authState");
           } else {
             // When the user logs out, remove from localStorage
             localStorage.removeItem("authState");

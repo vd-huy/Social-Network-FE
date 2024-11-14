@@ -90,8 +90,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (authState.isLoggedIn) {
-      fetchProfile();
       router.replace("/");
+      fetchProfile();
     }
   }, [authState, router]);
 

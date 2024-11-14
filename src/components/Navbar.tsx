@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { profileAtom } from "@/shared/store/atoms/profileAtom";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useResetRecoilState } from "recoil";
 
 import { SlSocialFoursqare } from "react-icons/sl";
 import { Input } from "./ui/input";
@@ -27,6 +27,8 @@ import {
 } from "./ui/dropdown-menu";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { authAtom } from "@/shared/store/atoms/authAtom";
+import { enqueueSnackbar } from "notistack";
 
 const Navbar = () => {
   const t = useTranslations("Navbar");
@@ -34,7 +36,9 @@ const Navbar = () => {
   const router = useRouter();
 
   const [value, setValue] = useState("");
+  const [authState, setAuthState] = useRecoilState(authAtom);
   const profile = useRecoilValue(profileAtom);
+  const resetProfile = useResetRecoilState(profileAtom);
 
   const handleHome = () => {
     router.replace("/home");
@@ -42,6 +46,24 @@ const Navbar = () => {
 
   const handleClear = () => {
     setValue("");
+  };
+
+  const handleLogout = () => {
+    setAuthState({
+      isLoggedIn: false,
+      accessToken: undefined,
+      remember: false,
+    });
+
+    resetProfile();
+
+    enqueueSnackbar("Logged out successfully", {
+      variant: "success",
+      autoHideDuration: 1000,
+    });
+
+    // Redirect to login page
+    router.replace("/login");
   };
 
   return (
@@ -119,7 +141,9 @@ const Navbar = () => {
             <DropdownMenuLabel>{t("account")}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>{t("profile")}</DropdownMenuItem>
-            <DropdownMenuItem>{t("logout")}</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
+              {t("logout")}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
